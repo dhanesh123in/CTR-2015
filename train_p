@@ -1,0 +1,136 @@
+\dtv
+select count(*) from train;
+select count(*) from train;
+select count(*) from test;
+\q
+\dtv
+select count(*) from train;
+select count(*) from test;
+\d train
+select count(distinct site_id) from train;
+select * from (select count(distinct site_id) from test ;
+select count(*) from (select distinct site_id from test) a join (select distinct site_id from train) b  on a.site_id=b.site_id;
+select count(distint site_domain) from train; select count(distinct site_domain) from test;
+select count(distinct site_domain) from train; select count(distinct site_domain) from test;
+select count(*) from (select distinct site_domain from test) a join (select distinct site_domain from train) b  on a.site_domain=b.site_domain;
+select count(*) from (select distinct site_domain from test) a;
+select count(*) from (select distinct site_domain from train) a;
+select count(*) from (select distinct site_category from train) a; select count(*) from (select distinct site_category from test) a;select count(*) from (select distinct site_category from test) a join (select distinct site_category from train) b  on a.site_category=b.site_category;
+\?
+echo '---'
+;
+select '---';
+\?
+\echo '----'
+\?
+\! ls
+\! ls *.sql
+\?
+\i basic_parms.sql
+select device_id, hour, last(hour) over (partition by device_id) from test;
+select device_id, hour, lag(hour) over (partition by device_id) from test;
+select 36^8;
+select device_id, count(device_id) over (partition by device_id order by id) from test;
+select id, device_id, count(*) over (partition by device_id order by id) from test;
+select id, device_id, count(*) over (partition by device_id order by id rows unbounded preceding) from test;
+select id, device_id, count(*) over (partition by device_id order by id rows unbounded preceding and current row) from test;
+select id, device_id, count(*) over (partition by device_id order by id range between unbounded preceding and current row) from test;
+select id, device_id, count(*) over (partition by device_id order by id rows between unbounded preceding and current row) from test;
+select id, sited_id, device_id, count(*) over (partition by site_id, device_id order by id) from test;
+select id, site_id, device_id, count(*) over (partition by site_id, device_id order by id) from test;
+alter table train add column day char(6);
+alter table test add column day char(6);
+update train
+set day=substring(hour from 7);
+update train
+set day=substring(hour from 1 for 6);
+update train
+set day=substring(hour from 1 for 6);
+update test
+set day=substring(hour from 1 for 6);
+commit;
+create table train_p as
+select *, 
+count(*) over w1 as numv1, count(*) over w2 as numv2, count(*) over w3 as numv3,
+count(*) over w4 as numv4, count(*) over w5 as numv5, count(*) over w6 as numv6,
+count(*) over w7 as numv7, count(*) over w8 as numv8, count(*) over w9 as numv9,
+count(*) over w10 as numv10, count(*) over w11 as numv11, count(*) over w12 as numv12
+from train
+window w1 as (partition by device_id, site_id, day order by id),
+w2 as (partition by device_id, site_domain, day order by id),
+w3 as (partition by device_id, site_category, day order by id),
+w4 as (partition by device_id, app_id, day order by id),
+w5 as (partition by device_id, app_domain, day order by id),
+w6 as (partition by device_id, app_category, day order by id),
+w7 as (partition by device_ip, site_id, day order by id),
+w8 as (partition by device_ip, site_domain, day order by id),
+w9 as (partition by device_ip, site_category, day order by id),
+w10 as (partition by device_ip, app_id, day order by id),
+w11 as (partition by device_ip, app_domain, day order by id),
+w12 as (partition by device_ip, app_category, day order by id);
+create table test_p as
+select *, 
+count(*) over w1 as numv1, count(*) over w2 as numv2, count(*) over w3 as numv3,
+count(*) over w4 as numv4, count(*) over w5 as numv5, count(*) over w6 as numv6,
+count(*) over w7 as numv7, count(*) over w8 as numv8, count(*) over w9 as numv9,
+count(*) over w10 as numv10, count(*) over w11 as numv11, count(*) over w12 as numv12
+from test
+window w1 as (partition by device_id, site_id, day order by id),
+w2 as (partition by device_id, site_domain, day order by id),
+w3 as (partition by device_id, site_category, day order by id),
+w4 as (partition by device_id, app_id, day order by id),
+w5 as (partition by device_id, app_domain, day order by id),
+w6 as (partition by device_id, app_category, day order by id),
+w7 as (partition by device_ip, site_id, day order by id),
+w8 as (partition by device_ip, site_domain, day order by id),
+w9 as (partition by device_ip, site_category, day order by id),
+w10 as (partition by device_ip, app_id, day order by id),
+w11 as (partition by device_ip, app_domain, day order by id),
+w12 as (partition by device_ip, app_category, day order by id);
+select * from train_p limit 50;
+\x
+select * from train_p limit 50;
+select * from train_p limit 50;
+select * from train_p limit 50;
+select * from train_p limit 50;
+select count(*) from train_p where device_id='a99f214a' and site_id='85f751fd' and day='141023';
+select * from train_p limit 50;
+select * from train_p limit 50;
+select * from train_p where device_id='a99f214a' and site_id='85f751fd' and day='141023' order by id;
+\pset
+\x
+\footer
+\pset footer off
+\pset fieldsep '\t'
+\pset fieldsep ','
+\pset format unaligned
+\o train_p.csv
+select * from train_p;
+\q
+\pset footer off
+\pset fieldsep ','
+\pset tuples_only
+\o train_p.csv
+select * from train_p limit 10;
+\q
+\pset footer
+\pset tuples_only
+\pset fieldsep ','
+\pset format unaligned
+\o train_p.csv
+select * from train_p limit 5;
+\q
+\x
+select id, device_id, site_id, day from train_p group by 1,2,3;
+select id, device_id, site_id, day from train_p group by 1,2,3 limit 50;
+select id, device_id, site_id, day from train_p limit 50;
+select id, device_id, site_id, numv1 day from train_p limit 50;
+select id, device_id, site_id, day, numv1 from train_p limit 50;
+select id, device_id, site_id, day, numv1 from train_p limit 50;
+select id, device_id, site_id, day, numv1 from train_p group by 2,3,4 order by 1;
+select device_id, site_id, day, numv1 from train_p group by 2,3,4 order by id;
+select id, device_id, site_id, day, numv1 from train_p order by 1,2,3;
+select id, device_id, site_id, day, numv1 from train_p order by 1,2,3 limit 50;
+\q
+\dtv
+\s train_p
